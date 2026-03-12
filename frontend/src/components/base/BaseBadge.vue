@@ -11,13 +11,13 @@ const props = withDefaults(
 
 const classes = computed(() => {
   const colors: Record<string, string> = {
-    red: 'bg-red-50 text-red-700 ring-red-600/10 border border-red-100',
-    yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-600/10 border border-yellow-100',
-    green: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 border border-emerald-100',
-    blue: 'bg-sky-50 text-sky-700 ring-sky-600/10 border border-sky-100',
-    indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-600/10 border border-indigo-100',
-    gray: 'bg-slate-50 text-slate-700 ring-slate-600/10 border border-slate-100',
-    amber: 'bg-amber-50 text-amber-800 ring-amber-600/10 border border-amber-100',
+    red: 'bg-red-100 text-red-800 border border-red-200',
+    yellow: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    green: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+    blue: 'bg-sky-100 text-sky-800 border border-sky-200',
+    indigo: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+    gray: 'bg-slate-100 text-slate-700 border border-slate-200',
+    amber: 'bg-amber-100 text-amber-800 border border-amber-200',
   }
   const sizes = { sm: 'px-2.5 py-0.5 text-[0.7rem]', md: 'px-3 py-1 text-xs' }
   return [
