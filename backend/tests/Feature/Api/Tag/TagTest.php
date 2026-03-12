@@ -6,6 +6,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
+    authenticateUser();
 });
 
 it('returns all tags', function () {

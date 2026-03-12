@@ -9,6 +9,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
+    authenticateUser();
 });
 
 it('returns a paginated list of tasks', function () {

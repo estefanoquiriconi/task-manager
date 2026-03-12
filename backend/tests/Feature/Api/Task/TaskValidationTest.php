@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Priority;
-use App\Models\Tag;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -9,6 +8,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
+    authenticateUser();
 });
 
 // --- Store (POST) ---

@@ -30,3 +30,11 @@ function seedLookupTables(): void
     (new Database\Seeders\PrioritySeeder)->run();
     (new Database\Seeders\TagSeeder)->run();
 }
+
+function authenticateUser(): App\Models\User
+{
+    $user = App\Models\User::factory()->create();
+    test()->actingAs($user, 'sanctum');
+
+    return $user;
+}
