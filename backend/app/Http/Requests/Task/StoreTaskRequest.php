@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Task;
 
 use App\Enums\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateTaskRequest extends FormRequest
+class StoreTaskRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,11 +17,11 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['sometimes', Rule::enum(TaskStatus::class)],
+            'status' => ['required', Rule::enum(TaskStatus::class)],
             'due_date' => ['nullable', 'date', 'after_or_equal:today'],
-            'priority_id' => ['sometimes', 'exists:priorities,id'],
+            'priority_id' => ['required', 'exists:priorities,id'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['exists:tags,id'],
         ];
