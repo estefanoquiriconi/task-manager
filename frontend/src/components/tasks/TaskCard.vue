@@ -47,7 +47,7 @@ function onStatusChange(event: Event) {
       <h3 class="truncate text-base font-semibold tracking-tight text-slate-900">
         {{ task.title }}
       </h3>
-      <BaseBadge :color="priorityInfo.color" size="sm" solid>
+      <BaseBadge :color="priorityInfo.color" size="sm">
         {{ task.priority.name }}
       </BaseBadge>
     </div>
