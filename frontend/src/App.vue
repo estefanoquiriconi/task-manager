@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import AppLayout from '@/components/layout/AppLayout.vue'
+import AppNotification from '@/components/layout/AppNotification.vue'
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <AppLayout>
     <RouterView />
-  </div>
+  </AppLayout>
+  <AppNotification />
 </template>
