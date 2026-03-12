@@ -35,3 +35,30 @@ export interface PaginatedResponse<T> {
     total: number
   }
 }
+
+export interface TaskFilters {
+  status?: 'pendiente' | 'en_progreso' | 'completada'
+  priority_id?: number
+  date_from?: string
+  date_to?: string
+  tag_id?: number
+  page?: number
+}
+
+export interface CreateTaskPayload {
+  title: string
+  description?: string | null
+  status: 'pendiente' | 'en_progreso' | 'completada'
+  due_date?: string | null
+  priority_id: number
+  tags?: number[]
+}
+
+export interface UpdateTaskPayload {
+  title?: string
+  description?: string | null
+  status?: 'pendiente' | 'en_progreso' | 'completada'
+  due_date?: string | null
+  priority_id?: number
+  tags?: number[]
+}
