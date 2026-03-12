@@ -6,8 +6,8 @@ Fullstack task management application with complete CRUD, priorities, and tags.
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | [Laravel 12](https://laravel.com/) · [PHP 8.4](https://www.php.net/) · [Pest](https://pestphp.com/) |
-| Frontend | [Vue 3](https://vuejs.org/) · [Pinia](https://pinia.vuejs.org/) · [Vue Router](https://router.vuejs.org/) · [TypeScript](https://www.typescriptlang.org/) |
+| Backend | [Laravel 12](https://laravel.com/) - [PHP 8.4](https://www.php.net/) - [Pest](https://pestphp.com/) |
+| Frontend | [Vue 3](https://vuejs.org/) - [Pinia](https://pinia.vuejs.org/) - [Vue Router](https://router.vuejs.org/) - [TypeScript](https://www.typescriptlang.org/) |
 | Database | [MySQL 8.0](https://www.mysql.com/) |
 | Containers | [Docker Compose](https://docs.docker.com/compose/) |
 
@@ -37,49 +37,15 @@ The application will be available at:
 |---------|-----|
 | Frontend | http://localhost:5173 |
 | Backend API | http://localhost:8000 |
+| API Docs | http://localhost:8000/docs/api |
 | MySQL | localhost:3306 |
 
-## Data Model
+## API Documentation
 
-```mermaid
-erDiagram
-    PRIORITIES {
-        bigint id PK
-        enum name "BAJA | MEDIA | ALTA"
-        timestamp created_at
-        timestamp updated_at
-    }
+The API documentation by [Scramble](https://scramble.dedoc.co/).
 
-    TAGS {
-        bigint id PK
-        enum name "DEV | QA | RRHH"
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    TASKS {
-        bigint id PK
-        string title
-        text description
-        enum status "pendiente | en_progreso | completada"
-        date due_date
-        bigint priority_id FK
-        timestamp created_at
-        timestamp updated_at
-        timestamp deleted_at
-    }
-
-    TASK_TAG {
-        bigint task_id FK
-        bigint tag_id FK
-    }
-
-    PRIORITIES ||--o{ TASKS : "has"
-    TASKS }o--o{ TAGS : "belongs"
-    TASKS ||--o{ TASK_TAG : ""
-    TAGS ||--o{ TASK_TAG : ""
-```
-
+- **Swagger UI**: http://localhost:8000/docs/api
+- **OpenAPI spec**: http://localhost:8000/docs/api.json
 
 ## Useful Commands
 
