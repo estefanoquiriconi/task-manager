@@ -3,12 +3,6 @@ import { useNotification } from '@/composables/useNotification'
 
 const { notifications, remove } = useNotification()
 
-const typeClasses: Record<string, string> = {
-  success: 'border-l-emerald-500',
-  error: 'border-l-red-500',
-  info: 'border-l-blue-500',
-}
-
 const iconClasses: Record<string, string> = {
   success: 'text-emerald-500',
   error: 'text-red-500',
@@ -37,7 +31,6 @@ const typeIcons: Record<string, string> = {
           v-for="n in notifications"
           :key="n.id"
           class="flex items-start gap-3 rounded-xl bg-white p-4 shadow-xl shadow-slate-900/10"
-          :class="typeClasses[n.type]"
         >
           <svg
             class="mt-0.5 h-5 w-5 shrink-0"
