@@ -26,4 +26,25 @@ class UpdateTaskRequest extends FormRequest
             'tags.*' => ['exists:tags,id'],
         ];
     }
+
+    /** @return array<string, string> */
+    public function attributes(): array
+    {
+        return [
+            'title' => 'título',
+            'description' => 'descripción',
+            'status' => 'estado',
+            'due_date' => 'fecha límite',
+            'priority_id' => 'prioridad',
+            'tags' => 'etiquetas',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'due_date.after_or_equal' => 'La fecha límite debe ser hoy o una fecha posterior.',
+        ];
+    }
 }
