@@ -16,6 +16,8 @@ Fullstack task management application with complete CRUD, priorities, and tags.
 
 - Docker and Docker Compose
 
+> Note: on environments with Docker Compose v2, you can use `docker compose` instead of `docker-compose`.
+
 ## Getting Started
 
 ```bash
