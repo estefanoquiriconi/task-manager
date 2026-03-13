@@ -40,7 +40,9 @@ function onStatusChange(event: Event) {
   >
     <!-- Header -->
     <div class="flex items-start justify-between gap-4 mt-1">
-      <h3 class="truncate text-lg font-bold tracking-tight text-slate-900 group-hover:text-indigo-700 transition-colors">
+      <h3
+        class="truncate text-lg font-bold tracking-tight text-slate-900 group-hover:text-indigo-700 transition-colors"
+      >
         {{ task.title }}
       </h3>
       <div class="flex-shrink-0">
@@ -51,14 +53,23 @@ function onStatusChange(event: Event) {
     </div>
 
     <!-- Description -->
-    <p v-if="task.description" class="mt-2.5 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-slate-500">
+    <p
+      v-if="task.description"
+      class="mt-2.5 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-slate-500"
+    >
       {{ task.description }}
     </p>
     <div v-else class="mt-2.5 min-h-[2.5rem]"></div>
 
     <!-- Tags -->
     <div v-if="task.tags.length" class="mt-4 flex flex-wrap gap-1.5">
-      <BaseBadge v-for="tag in task.tags" :key="tag.id" color="gray" size="sm" class="bg-slate-100/80 text-slate-600">
+      <BaseBadge
+        v-for="tag in task.tags"
+        :key="tag.id"
+        color="gray"
+        size="sm"
+        class="bg-slate-100/80 text-slate-600"
+      >
         {{ tag.name }}
       </BaseBadge>
     </div>
@@ -68,7 +79,9 @@ function onStatusChange(event: Event) {
     <div class="flex-grow"></div>
 
     <!-- Footer: due date + actions -->
-    <div class="mt-6 flex flex-wrap items-center justify-between border-t border-slate-100/80 pt-4 gap-3">
+    <div
+      class="mt-6 flex flex-wrap items-center justify-between border-t border-slate-100/80 pt-4 gap-3"
+    >
       <div class="flex items-center gap-3">
         <!-- Interactive Status Badge/Select -->
         <div class="relative group/status rounded-lg">
@@ -83,26 +96,38 @@ function onStatusChange(event: Event) {
               {{ opt.label }}
             </option>
           </select>
-          <div 
+          <div
             class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-200 shadow-sm"
             :class="{
-              'bg-amber-50 text-amber-700 border-amber-200 group-hover/status:border-amber-300 group-hover/status:bg-amber-100': task.status === 'pendiente',
-              'bg-blue-50 text-blue-700 border-blue-200 group-hover/status:border-blue-300 group-hover/status:bg-blue-100': task.status === 'en_progreso',
-              'bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/status:border-emerald-300 group-hover/status:bg-emerald-100': task.status === 'completada'
+              'bg-amber-50 text-amber-700 border-amber-200 group-hover/status:border-amber-300 group-hover/status:bg-amber-100':
+                task.status === 'pendiente',
+              'bg-blue-50 text-blue-700 border-blue-200 group-hover/status:border-blue-300 group-hover/status:bg-blue-100':
+                task.status === 'en_progreso',
+              'bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/status:border-emerald-300 group-hover/status:bg-emerald-100':
+                task.status === 'completada',
             }"
           >
             <!-- Status Dot -->
-            <span 
+            <span
               class="w-1.5 h-1.5 rounded-full"
               :class="{
                 'bg-amber-500': task.status === 'pendiente',
                 'bg-blue-500': task.status === 'en_progreso',
-                'bg-emerald-500': task.status === 'completada'
+                'bg-emerald-500': task.status === 'completada',
               }"
             ></span>
             {{ statusInfo.label }}
-            <svg class="h-3.5 w-3.5 opacity-60 ml-0.5 group-hover/status:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            <svg
+              class="h-3.5 w-3.5 opacity-60 ml-0.5 group-hover/status:opacity-100 transition-opacity"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
         </div>
@@ -132,7 +157,6 @@ function onStatusChange(event: Event) {
       <div
         class="flex items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-within:opacity-100 sm:opacity-100"
       >
-
         <RouterLink
           :to="{ name: 'task-edit', params: { id: task.id } }"
           class="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"

@@ -27,19 +27,8 @@ const inputClasses = computed(() => [
 <template>
   <div>
     <label class="mb-1.5 block text-sm font-medium text-slate-700">{{ label }}</label>
-    <textarea
-      v-if="multiline"
-      v-model="model"
-      v-bind="attrs"
-      rows="3"
-      :class="inputClasses"
-    />
-    <input
-      v-else
-      v-model="model"
-      v-bind="attrs"
-      :class="inputClasses"
-    />
+    <textarea v-if="multiline" v-model="model" v-bind="attrs" rows="3" :class="inputClasses" />
+    <input v-else v-model="model" v-bind="attrs" :class="inputClasses" />
     <p v-if="error" class="mt-1.5 text-sm text-red-500">{{ error }}</p>
   </div>
 </template>

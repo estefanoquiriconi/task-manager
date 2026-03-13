@@ -25,11 +25,7 @@ const selectClasses = computed(() => [
 <template>
   <div>
     <label class="mb-1.5 block text-sm font-medium text-slate-700">{{ label }}</label>
-    <select
-      v-model="model"
-      v-bind="attrs"
-      :class="selectClasses"
-    >
+    <select v-model="model" v-bind="attrs" :class="selectClasses">
       <option v-if="placeholder" :value="undefined" class="text-slate-500">
         {{ placeholder }}
       </option>

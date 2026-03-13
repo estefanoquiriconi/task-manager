@@ -118,11 +118,7 @@ function nextPage() {
         No encontramos tareas que coincidan con los filtros que aplicaste. Mueve los filtros o
         límpialos para ver tus tareas.
       </p>
-      <BaseButton
-        variant="secondary"
-        class="mt-6"
-        @click="clearAndFetch"
-      >
+      <BaseButton variant="secondary" class="mt-6" @click="clearAndFetch">
         Limpiar filtros
       </BaseButton>
     </template>
@@ -167,10 +163,7 @@ function nextPage() {
     </TransitionGroup>
 
     <!-- Pagination -->
-    <div
-      v-if="store.lastPage > 1"
-      class="mt-10 flex items-center justify-between px-2"
-    >
+    <div v-if="store.lastPage > 1" class="mt-10 flex items-center justify-between px-2">
       <p class="text-sm font-medium text-slate-500">
         {{ store.total }} tarea{{ store.total !== 1 ? 's' : '' }} en total
       </p>

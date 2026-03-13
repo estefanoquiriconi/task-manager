@@ -69,7 +69,9 @@ onMounted(() => {
       </div>
 
       <div class="w-full sm:w-auto">
-        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">Desde</label>
+        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >Desde</label
+        >
         <input
           v-model="localFilters.date_from"
           type="date"
@@ -78,7 +80,9 @@ onMounted(() => {
       </div>
 
       <div class="w-full sm:w-auto">
-        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasta</label>
+        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider"
+          >Hasta</label
+        >
         <input
           v-model="localFilters.date_to"
           type="date"

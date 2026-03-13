@@ -6,11 +6,11 @@ import { TASK_STATUS_OPTIONS, type Task, type CreateTaskPayload } from '@/types'
 import BaseInput from '@/components/base/BaseInput.vue'
 import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
-import BaseBadge from '@/components/base/BaseBadge.vue'
 
 const props = defineProps<{
   initialData?: Task
   submitting: boolean
+  serverErrors?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +30,10 @@ const form = reactive({
 
 const errors = reactive<Record<string, string>>({})
 const touched = reactive<Record<string, boolean>>({})
+
+function fieldError(field: string): string | undefined {
+  return props.serverErrors?.[field] || (touched[field] ? errors[field] : undefined) || undefined
+}
 
 const statusOptions = TASK_STATUS_OPTIONS
 
@@ -92,7 +96,7 @@ onMounted(() => {
         <BaseInput
           v-model="form.title"
           label="Título de la tarea"
-          :error="touched.title ? errors.title : undefined"
+          :error="fieldError('title')"
           @blur="onBlur('title')"
           placeholder="Ej. Revisar diseño de la landing page..."
         />
@@ -112,21 +116,21 @@ onMounted(() => {
             label="Nivel de prioridad"
             placeholder="Seleccionar..."
             :options="priorityOptions"
-            :error="touched.priority_id ? errors.priority_id : undefined"
+            :error="fieldError('priority_id')"
           />
 
-          <div>
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700">Fecha límite</label>
-            <input
-              v-model="form.due_date"
-              type="date"
-              class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            />
-          </div>
+          <BaseInput
+            v-model="form.due_date"
+            label="Fecha límite"
+            type="date"
+            :error="fieldError('due_date')"
+          />
         </div>
 
         <div class="pt-4 border-t border-slate-100/80 mt-6">
-          <label class="mb-3 block text-sm font-semibold text-slate-700">Etiquetas relacionadas</label>
+          <label class="mb-3 block text-sm font-semibold text-slate-700"
+            >Etiquetas relacionadas</label
+          >
           <div class="flex flex-wrap gap-2.5">
             <button
               v-for="tag in store.tags"
@@ -173,11 +177,11 @@ onMounted(() => {
       >
         Cancelar
       </RouterLink>
-      <BaseButton 
-        type="submit" 
-        variant="primary" 
+      <BaseButton
+        type="submit"
+        variant="primary"
         class="px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 font-semibold"
-        :loading="submitting" 
+        :loading="submitting"
         :disabled="submitting"
       >
         {{ submitting ? 'Guardando...' : initialData ? 'Guardar cambios' : 'Crear tarea' }}

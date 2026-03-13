@@ -44,7 +44,10 @@ const typeIcons: Record<string, string> = {
             <path stroke-linecap="round" stroke-linejoin="round" :d="typeIcons[n.type]" />
           </svg>
           <p class="flex-1 text-sm font-medium text-slate-700">{{ n.message }}</p>
-          <button class="shrink-0 text-slate-400 transition-colors hover:text-slate-600" @click="remove(n.id)">
+          <button
+            class="shrink-0 text-slate-400 transition-colors hover:text-slate-600"
+            @click="remove(n.id)"
+          >
             <svg
               class="h-4 w-4"
               xmlns="http://www.w3.org/2000/svg"

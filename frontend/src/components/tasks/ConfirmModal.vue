@@ -74,7 +74,9 @@ onBeforeUnmount(() => {
         tabindex="-1"
         class="relative w-full max-w-sm transform overflow-hidden rounded-2xl bg-white p-6 shadow-2xl transition-all focus:outline-none"
       >
-        <h3 id="modal-title" class="text-lg font-semibold tracking-tight text-slate-900">{{ title }}</h3>
+        <h3 id="modal-title" class="text-lg font-semibold tracking-tight text-slate-900">
+          {{ title }}
+        </h3>
         <p id="modal-description" class="mt-2 text-sm text-slate-500">{{ message }}</p>
         <div class="mt-6 flex justify-end gap-3">
           <BaseButton variant="secondary" @click="emit('cancel')"> Cancelar </BaseButton>
