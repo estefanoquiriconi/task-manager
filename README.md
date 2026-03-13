@@ -7,7 +7,7 @@ Fullstack task management application with complete CRUD, priorities, and tags.
 | Layer | Technology |
 |-------|-----------|
 | Backend | [Laravel 12](https://laravel.com/) - [PHP 8.4](https://www.php.net/) - [Pest](https://pestphp.com/) |
-| Frontend | [Vue 3](https://vuejs.org/) - [TypeScript](https://www.typescriptlang.org/) - [Pinia](https://pinia.vuejs.org/) - [Vue Router](https://router.vuejs.org/) - [Tailwind CSS v4](https://tailwindcss.com/) - [Axios](https://axios-http.com/) |
+| Frontend | [Vue 3](https://vuejs.org/) - [TypeScript](https://www.typescriptlang.org/) - [Pinia](https://pinia.vuejs.org/) - [Vue Router](https://router.vuejs.org/) - [Tailwind CSS v4](https://tailwindcss.com/) - [Axios](https://axios-http.com/) - [Vitest](https://vitest.dev/) |
 | Build | [Vite 7](https://vite.dev/) |
 | Database | [MySQL 8.0](https://www.mysql.com/) |
 | Containers | [Docker Compose](https://docs.docker.com/compose/) |
@@ -24,11 +24,16 @@ git clone <repo-url> && cd task-manager
 
 # 2. Set up environment variables
 cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 
 # 3. Start the containers
 docker-compose up -d
 
-# 4. Run migrations and seeders
+# 4. Generate the Laravel app key
+docker exec task_manager_api php artisan key:generate
+
+# 5. Run migrations and seeders
 docker exec task_manager_api php artisan migrate --seed
 ```
 
@@ -40,6 +45,63 @@ The application will be available at:
 | Backend API | http://localhost:8000 |
 | API Docs | http://localhost:8000/docs/api |
 | MySQL | localhost:3306 |
+
+## Project Structure
+
+```
+backend/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/Api/     # AuthController, TaskController, PriorityController, TagController
+│   │   ├── Requests/            # Form Requests organized by domain (Auth/, Task/)
+│   │   └── Resources/           # TaskResource, UserResource
+│   ├── Models/                  # Task, Priority, Tag, User
+│   ├── Repositories/            # TaskRepository (queries, filters, eager loading)
+│   └── Services/                # AuthService, TaskService (business logic)
+├── routes/api.php
+└── tests/Feature/Api/           # Pest feature tests
+
+frontend/src/
+├── components/
+│   ├── base/                    # BaseButton, BaseInput, BaseSelect, BaseBadge
+│   ├── layout/                  # AppLayout, AppNotification
+│   └── tasks/                   # TaskCard, TaskForm, TaskFilters, TaskList, ConfirmModal
+├── composables/                 # useNotification
+├── services/                    # api.ts (Axios), authService.ts, taskService.ts
+├── stores/                      # authStore.ts, taskStore.ts (Pinia)
+├── types/                       # TypeScript interfaces
+└── views/                       # TasksView, TaskFormView, LoginView, RegisterView
+```
+
+## API Endpoints
+
+### Authentication
+
+| Method | URI | Auth | Description |
+|--------|-----|------|-------------|
+| POST | `/api/register` | No | Register user and return token |
+| POST | `/api/login` | No | Login and return token |
+| POST | `/api/logout` | Yes | Revoke tokens |
+| GET | `/api/user` | Yes | Get authenticated user |
+
+### Tasks
+
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | `/api/tasks` | List tasks (paginated, filterable) |
+| POST | `/api/tasks` | Create task |
+| GET | `/api/tasks/{id}` | Get task detail |
+| PUT | `/api/tasks/{id}` | Update task |
+| DELETE | `/api/tasks/{id}` | Soft delete task |
+
+**Filters** (query params on `GET /api/tasks`): `status`, `priority_id`, `date_from`, `date_to`, `tag_id`, `page`
+
+### Catalogs
+
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | `/api/priorities` | List priorities |
+| GET | `/api/tags` | List tags |
 
 ## API Documentation
 
@@ -94,6 +156,22 @@ docker exec task_manager_front npm run type-check
 # Lint (oxlint + eslint)
 docker exec task_manager_front npm run lint
 
+# Unit tests
+docker exec task_manager_front npm run test:unit
+
 # Format (prettier)
 docker exec task_manager_front npm run format
 ```
+
+## Architecture Decisions
+
+Layered backend — Controller > Service > Repository.  
+Controllers handle HTTP concerns, services contain business logic, and repositories encapsulate database queries. This separation keeps each layer independently testable and easier to evolve.
+
+Soft deletes — Tasks use SoftDeletes to allow recovery and preserve basic audit history while preventing permanent data loss.
+
+Sanctum personal access tokens — Stateless authentication for the SPA using Bearer tokens. This approach is simple, avoids session/cookie complexity with CORS, and is sufficient for the scope of the project.
+
+Pinia composition stores — Stores use the setup() syntax to leverage full TypeScript inference and composable reuse.
+
+Service layer in frontend — `authService` and `taskService` isolate HTTP calls from Pinia stores, allowing stores to focus on state management and enabling easier testing with simple mocks.
