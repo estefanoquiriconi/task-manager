@@ -24,6 +24,8 @@ class TaskService
         $tags = $data['tags'] ?? null;
         unset($data['tags']);
 
+        $data['user_id'] = auth()->id();
+
         $task = $this->repository->create($data);
 
         if ($tags !== null) {

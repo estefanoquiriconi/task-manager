@@ -8,7 +8,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
-    authenticateUser();
+    $this->user = authenticateUser();
 });
 
 // --- Store (POST) ---
@@ -110,7 +110,7 @@ it('accepts null description and due_date', function () {
 // --- Update (PUT) ---
 
 it('allows partial update without required fields', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
 
     $this->putJson("/api/tasks/{$task->id}", [
         'title' => 'Only Title',
@@ -119,7 +119,7 @@ it('allows partial update without required fields', function () {
 });
 
 it('rejects invalid status on update', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
 
     $this->putJson("/api/tasks/{$task->id}", [
         'status' => 'invalid_status',
@@ -128,7 +128,7 @@ it('rejects invalid status on update', function () {
 });
 
 it('rejects non-existent priority_id on update', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
 
     $this->putJson("/api/tasks/{$task->id}", [
         'priority_id' => 9999,
@@ -139,7 +139,7 @@ it('rejects non-existent priority_id on update', function () {
 it('rejects past due_date on update', function () {
     $this->travelTo(now());
 
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
 
     $this->putJson("/api/tasks/{$task->id}", [
         'due_date' => now()->subDay()->toDateString(),

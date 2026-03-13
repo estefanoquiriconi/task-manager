@@ -9,11 +9,11 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
-    authenticateUser();
+    $this->user = authenticateUser();
 });
 
 it('returns a paginated list of tasks', function () {
-    Task::factory()->count(3)->create();
+    Task::factory()->count(3)->create(['user_id' => $this->user->id]);
 
     $response = $this->getJson('/api/tasks');
 
@@ -49,7 +49,7 @@ it('creates a task without tags', function () {
         ->assertJsonPath('data.status', 'pendiente')
         ->assertJsonCount(0, 'data.tags');
 
-    $this->assertDatabaseHas('tasks', ['title' => 'New Task']);
+    $this->assertDatabaseHas('tasks', ['title' => 'New Task', 'user_id' => $this->user->id]);
 });
 
 it('creates a task with tags', function () {
@@ -71,7 +71,7 @@ it('creates a task with tags', function () {
 });
 
 it('shows a single task with relations', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
     $tag = Tag::first();
     $task->tags()->attach($tag);
 
@@ -92,7 +92,7 @@ it('returns 404 for a non-existent task', function () {
 });
 
 it('updates a task title only', function () {
-    $task = Task::factory()->create(['title' => 'Original Title']);
+    $task = Task::factory()->create(['title' => 'Original Title', 'user_id' => $this->user->id]);
 
     $response = $this->putJson("/api/tasks/{$task->id}", [
         'title' => 'Updated Title',
@@ -104,7 +104,7 @@ it('updates a task title only', function () {
 });
 
 it('clears tags when empty array is sent', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
     $task->tags()->attach(Tag::take(2)->pluck('id'));
 
     $response = $this->putJson("/api/tasks/{$task->id}", [
@@ -118,7 +118,7 @@ it('clears tags when empty array is sent', function () {
 });
 
 it('preserves tags when key is absent', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
     $task->tags()->attach(Tag::take(2)->pluck('id'));
 
     $response = $this->putJson("/api/tasks/{$task->id}", [
@@ -130,7 +130,7 @@ it('preserves tags when key is absent', function () {
 });
 
 it('soft deletes a task', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
 
     $response = $this->deleteJson("/api/tasks/{$task->id}");
 
@@ -139,7 +139,7 @@ it('soft deletes a task', function () {
 });
 
 it('excludes soft-deleted tasks from index and show', function () {
-    $task = Task::factory()->create();
+    $task = Task::factory()->create(['user_id' => $this->user->id]);
     $task->delete();
 
     $this->getJson('/api/tasks')
@@ -147,5 +147,23 @@ it('excludes soft-deleted tasks from index and show', function () {
         ->assertJsonCount(0, 'data');
 
     $this->getJson("/api/tasks/{$task->id}")
+        ->assertNotFound();
+});
+
+it('cannot access another user\'s tasks', function () {
+    $otherUser = \App\Models\User::factory()->create();
+    $task = Task::factory()->create(['user_id' => $otherUser->id]);
+
+    $this->getJson('/api/tasks')
+        ->assertSuccessful()
+        ->assertJsonCount(0, 'data');
+
+    $this->getJson("/api/tasks/{$task->id}")
+        ->assertNotFound();
+
+    $this->putJson("/api/tasks/{$task->id}", ['title' => 'Hacked'])
+        ->assertNotFound();
+
+    $this->deleteJson("/api/tasks/{$task->id}")
         ->assertNotFound();
 });

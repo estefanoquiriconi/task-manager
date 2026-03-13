@@ -9,12 +9,12 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     seedLookupTables();
-    authenticateUser();
+    $this->user = authenticateUser();
 });
 
 it('filters by status', function () {
-    Task::factory()->create(['status' => 'pendiente']);
-    Task::factory()->create(['status' => 'completada']);
+    Task::factory()->create(['status' => 'pendiente', 'user_id' => $this->user->id]);
+    Task::factory()->create(['status' => 'completada', 'user_id' => $this->user->id]);
 
     $this->getJson('/api/tasks?status=pendiente')
         ->assertSuccessful()
@@ -24,8 +24,8 @@ it('filters by status', function () {
 
 it('filters by priority_id', function () {
     $priorities = Priority::all();
-    Task::factory()->create(['priority_id' => $priorities[0]->id]);
-    Task::factory()->create(['priority_id' => $priorities[1]->id]);
+    Task::factory()->create(['priority_id' => $priorities[0]->id, 'user_id' => $this->user->id]);
+    Task::factory()->create(['priority_id' => $priorities[1]->id, 'user_id' => $this->user->id]);
 
     $this->getJson("/api/tasks?priority_id={$priorities[0]->id}")
         ->assertSuccessful()
@@ -34,8 +34,8 @@ it('filters by priority_id', function () {
 });
 
 it('filters by date_from', function () {
-    Task::factory()->create(['due_date' => '2026-03-10']);
-    Task::factory()->create(['due_date' => '2026-03-20']);
+    Task::factory()->create(['due_date' => '2026-03-10', 'user_id' => $this->user->id]);
+    Task::factory()->create(['due_date' => '2026-03-20', 'user_id' => $this->user->id]);
 
     $this->getJson('/api/tasks?date_from=2026-03-15')
         ->assertSuccessful()
@@ -44,8 +44,8 @@ it('filters by date_from', function () {
 });
 
 it('filters by date_to', function () {
-    Task::factory()->create(['due_date' => '2026-03-10']);
-    Task::factory()->create(['due_date' => '2026-03-20']);
+    Task::factory()->create(['due_date' => '2026-03-10', 'user_id' => $this->user->id]);
+    Task::factory()->create(['due_date' => '2026-03-20', 'user_id' => $this->user->id]);
 
     $this->getJson('/api/tasks?date_to=2026-03-15')
         ->assertSuccessful()
@@ -54,9 +54,9 @@ it('filters by date_to', function () {
 });
 
 it('filters by date range', function () {
-    Task::factory()->create(['due_date' => '2026-03-05']);
-    Task::factory()->create(['due_date' => '2026-03-15']);
-    Task::factory()->create(['due_date' => '2026-03-25']);
+    Task::factory()->create(['due_date' => '2026-03-05', 'user_id' => $this->user->id]);
+    Task::factory()->create(['due_date' => '2026-03-15', 'user_id' => $this->user->id]);
+    Task::factory()->create(['due_date' => '2026-03-25', 'user_id' => $this->user->id]);
 
     $this->getJson('/api/tasks?date_from=2026-03-10&date_to=2026-03-20')
         ->assertSuccessful()
@@ -66,9 +66,9 @@ it('filters by date range', function () {
 
 it('filters by tag_id', function () {
     $tag = Tag::first();
-    $taskWithTag = Task::factory()->create();
+    $taskWithTag = Task::factory()->create(['user_id' => $this->user->id]);
     $taskWithTag->tags()->attach($tag);
-    Task::factory()->create();
+    Task::factory()->create(['user_id' => $this->user->id]);
 
     $this->getJson("/api/tasks?tag_id={$tag->id}")
         ->assertSuccessful()
@@ -77,8 +77,8 @@ it('filters by tag_id', function () {
 });
 
 it('returns tasks ordered by latest', function () {
-    $old = Task::factory()->create(['title' => 'Old Task', 'created_at' => now()->subMinute()]);
-    $new = Task::factory()->create(['title' => 'New Task', 'created_at' => now()]);
+    $old = Task::factory()->create(['title' => 'Old Task', 'created_at' => now()->subMinute(), 'user_id' => $this->user->id]);
+    $new = Task::factory()->create(['title' => 'New Task', 'created_at' => now(), 'user_id' => $this->user->id]);
 
     $this->getJson('/api/tasks')
         ->assertSuccessful()
@@ -86,7 +86,7 @@ it('returns tasks ordered by latest', function () {
 });
 
 it('paginates with 15 per page', function () {
-    Task::factory()->count(20)->create();
+    Task::factory()->count(20)->create(['user_id' => $this->user->id]);
 
     $page1 = $this->getJson('/api/tasks');
     $page1->assertSuccessful()
@@ -96,4 +96,14 @@ it('paginates with 15 per page', function () {
     $page2 = $this->getJson('/api/tasks?page=2');
     $page2->assertSuccessful()
         ->assertJsonCount(5, 'data');
+});
+
+it('does not show tasks from other users', function () {
+    $otherUser = \App\Models\User::factory()->create();
+    Task::factory()->count(3)->create(['user_id' => $otherUser->id]);
+    Task::factory()->count(2)->create(['user_id' => $this->user->id]);
+
+    $this->getJson('/api/tasks')
+        ->assertSuccessful()
+        ->assertJsonCount(2, 'data');
 });
