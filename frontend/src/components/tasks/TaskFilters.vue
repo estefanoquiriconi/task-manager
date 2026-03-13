@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, onMounted } from 'vue'
 import { useTaskStore } from '@/stores/taskStore'
-import type { TaskFilters } from '@/types'
+import { TASK_STATUS_OPTIONS, type TaskFilters } from '@/types'
 import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 
@@ -15,11 +15,7 @@ const localFilters = reactive<TaskFilters>({
   date_to: undefined,
 })
 
-const statusOptions = [
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'en_progreso', label: 'En Progreso' },
-  { value: 'completada', label: 'Completada' },
-]
+const statusOptions = TASK_STATUS_OPTIONS
 
 function applyFilters() {
   store.setFilters({ ...localFilters })
@@ -43,49 +39,55 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-    <div class="flex flex-wrap items-end gap-5">
-      <BaseSelect
-        v-model="localFilters.status"
-        label="Estado"
-        placeholder="Todos"
-        :options="statusOptions"
-      />
+  <div class="rounded-2xl bg-white/60 backdrop-blur-md p-4 shadow-sm ring-1 ring-slate-200/50">
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="w-full sm:w-auto flex-1 min-w-[140px]">
+        <BaseSelect
+          v-model="localFilters.status"
+          label="Estado"
+          placeholder="Todos"
+          :options="statusOptions"
+        />
+      </div>
 
-      <BaseSelect
-        v-model.number="localFilters.priority_id"
-        label="Prioridad"
-        placeholder="Todas"
-        :options="store.priorities.map((p) => ({ value: p.id, label: p.name }))"
-      />
+      <div class="w-full sm:w-auto flex-1 min-w-[140px]">
+        <BaseSelect
+          v-model.number="localFilters.priority_id"
+          label="Prioridad"
+          placeholder="Todas"
+          :options="store.priorities.map((p) => ({ value: p.id, label: p.name }))"
+        />
+      </div>
 
-      <BaseSelect
-        v-model.number="localFilters.tag_id"
-        label="Etiqueta"
-        placeholder="Todas"
-        :options="store.tags.map((t) => ({ value: t.id, label: t.name }))"
-      />
+      <div class="w-full sm:w-auto flex-1 min-w-[140px]">
+        <BaseSelect
+          v-model.number="localFilters.tag_id"
+          label="Etiqueta"
+          placeholder="Todas"
+          :options="store.tags.map((t) => ({ value: t.id, label: t.name }))"
+        />
+      </div>
 
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Desde</label>
+      <div class="w-full sm:w-auto">
+        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">Desde</label>
         <input
           v-model="localFilters.date_from"
           type="date"
-          class="block rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
       </div>
 
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Hasta</label>
+      <div class="w-full sm:w-auto">
+        <label class="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasta</label>
         <input
           v-model="localFilters.date_to"
           type="date"
-          class="block rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
       </div>
 
-      <div class="flex gap-2">
-        <BaseButton variant="primary" size="sm" @click="applyFilters">
+      <div class="flex w-full sm:w-auto items-center gap-2 pt-1 sm:pt-0">
+        <BaseButton variant="primary" size="md" class="w-full sm:w-auto" @click="applyFilters">
           <svg
             class="-ml-0.5 h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +105,7 @@ onMounted(() => {
           Filtrar
         </BaseButton>
 
-        <BaseButton v-if="store.hasActiveFilters" variant="ghost" size="sm" @click="clearFilters">
+        <BaseButton v-if="store.hasActiveFilters" variant="ghost" size="md" @click="clearFilters">
           Limpiar
         </BaseButton>
       </div>

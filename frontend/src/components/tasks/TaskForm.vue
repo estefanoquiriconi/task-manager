@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
-import type { Task, CreateTaskPayload } from '@/types'
+import { TASK_STATUS_OPTIONS, type Task, type CreateTaskPayload } from '@/types'
 import BaseInput from '@/components/base/BaseInput.vue'
 import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
@@ -31,11 +31,7 @@ const form = reactive({
 const errors = reactive<Record<string, string>>({})
 const touched = reactive<Record<string, boolean>>({})
 
-const statusOptions = [
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'en_progreso', label: 'En Progreso' },
-  { value: 'completada', label: 'Completada' },
-]
+const statusOptions = TASK_STATUS_OPTIONS
 
 const priorityOptions = computed(() =>
   store.priorities.map((p) => ({ value: p.id, label: p.name })),
@@ -73,7 +69,7 @@ function onSubmit() {
   const payload: CreateTaskPayload = {
     title: form.title.trim(),
     description: form.description.trim() || null,
-    status: form.status as CreateTaskPayload['status'],
+    status: form.status,
     due_date: form.due_date || null,
     priority_id: form.priority_id!,
     tags: form.tags.length > 0 ? form.tags : undefined,
@@ -88,53 +84,59 @@ onMounted(() => {
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="onSubmit">
+  <form class="space-y-8" @submit.prevent="onSubmit">
     <div
-      class="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-md p-5 sm:p-6 shadow-sm"
+      class="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-100/50"
     >
-      <div class="space-y-5">
+      <div class="space-y-6">
         <BaseInput
           v-model="form.title"
           label="Título de la tarea"
           :error="touched.title ? errors.title : undefined"
           @blur="onBlur('title')"
+          placeholder="Ej. Revisar diseño de la landing page..."
         />
 
-        <BaseInput v-model="form.description" label="Descripción detallada" type="textarea" />
+        <BaseInput
+          v-model="form.description"
+          label="Descripción detallada"
+          multiline
+          placeholder="Agrega más detalles sobre lo que hay que hacer..."
+        />
 
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <BaseSelect v-model="form.status" label="Estado" :options="statusOptions" />
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <BaseSelect v-model="form.status" label="Estado actual" :options="statusOptions" />
 
           <BaseSelect
             v-model.number="form.priority_id"
-            label="Prioridad"
+            label="Nivel de prioridad"
             placeholder="Seleccionar..."
             :options="priorityOptions"
             :error="touched.priority_id ? errors.priority_id : undefined"
           />
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Fecha límite</label>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">Fecha límite</label>
             <input
               v-model="form.due_date"
               type="date"
-              class="block w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-0 border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-indigo-500/20"
+              class="block w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
         </div>
 
-        <div class="pt-2">
-          <label class="mb-2.5 block text-sm font-medium text-slate-700">Etiquetas</label>
-          <div class="flex flex-wrap gap-2">
+        <div class="pt-4 border-t border-slate-100/80 mt-6">
+          <label class="mb-3 block text-sm font-semibold text-slate-700">Etiquetas relacionadas</label>
+          <div class="flex flex-wrap gap-2.5">
             <button
               v-for="tag in store.tags"
               :key="tag.id"
               type="button"
-              class="rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
+              class="rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
               :class="
                 form.tags.includes(tag.id)
-                  ? 'border-indigo-500 bg-indigo-50/80 text-indigo-700 shadow-sm shadow-indigo-500/10'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-500/20 ring-1 ring-indigo-500'
+                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
               "
               @click="toggleTag(tag.id)"
             >
@@ -152,27 +154,32 @@ onMounted(() => {
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span>{{
-                  tag.name
-                }}</span>
+                <span>{{ tag.name }}</span>
               </span>
             </button>
           </div>
           <p v-if="store.tags.length === 0" class="mt-2 text-sm text-slate-500 italic">
-            Cargando etiquetas...
+            Cargando etiquetas disponibles...
           </p>
         </div>
       </div>
     </div>
 
-    <div class="flex items-center justify-end gap-3">
+    <!-- Actions Footer -->
+    <div class="flex items-center justify-end gap-3 pt-4">
       <RouterLink
         :to="{ name: 'tasks' }"
-        class="inline-flex items-center justify-center gap-2 font-medium rounded-lg px-4 py-2 text-sm border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-300 transition-all duration-200"
+        class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-200/50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2"
       >
         Cancelar
       </RouterLink>
-      <BaseButton type="submit" variant="primary" :loading="submitting" :disabled="submitting">
+      <BaseButton 
+        type="submit" 
+        variant="primary" 
+        class="px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 font-semibold"
+        :loading="submitting" 
+        :disabled="submitting"
+      >
         {{ submitting ? 'Guardando...' : initialData ? 'Guardar cambios' : 'Crear tarea' }}
       </BaseButton>
     </div>

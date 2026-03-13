@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import type { Task } from '@/types'
+import type { Task, TaskStatus } from '@/types'
+import { TASK_STATUS_OPTIONS } from '@/types'
 import BaseBadge from '@/components/base/BaseBadge.vue'
 
 const props = defineProps<{ task: Task }>()
 const emit = defineEmits<{
-  'status-change': [id: number, status: string]
+  'status-change': [id: number, status: TaskStatus]
   delete: [id: number]
 }>()
 
@@ -22,11 +23,6 @@ const statusConfig: Record<string, { label: string; color: 'amber' | 'blue' | 'g
   completada: { label: 'Completada', color: 'green' },
 }
 
-const isOverdue = computed(() => {
-  if (!props.task.due_date || props.task.status === 'completada') return false
-  return new Date(props.task.due_date) < new Date()
-})
-
 const defaultStatus = { label: 'Pendiente', color: 'amber' as const }
 const statusInfo = computed(() => statusConfig[props.task.status] ?? defaultStatus)
 const priorityInfo = computed(
@@ -34,87 +30,117 @@ const priorityInfo = computed(
 )
 
 function onStatusChange(event: Event) {
-  emit('status-change', props.task.id, (event.target as HTMLSelectElement).value)
+  emit('status-change', props.task.id, (event.target as HTMLSelectElement).value as TaskStatus)
 }
 </script>
 
 <template>
   <div
-    class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden"
+    class="group flex flex-col rounded-2xl bg-white p-5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] ring-1 ring-slate-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:ring-slate-200 relative overflow-hidden"
   >
     <!-- Header -->
-    <div class="flex items-start justify-between gap-3">
-      <h3 class="truncate text-base font-semibold tracking-tight text-slate-900">
+    <div class="flex items-start justify-between gap-4 mt-1">
+      <h3 class="truncate text-lg font-bold tracking-tight text-slate-900 group-hover:text-indigo-700 transition-colors">
         {{ task.title }}
       </h3>
-      <BaseBadge :color="priorityInfo.color" size="sm">
-        {{ task.priority.name }}
-      </BaseBadge>
+      <div class="flex-shrink-0">
+        <BaseBadge :color="priorityInfo.color" size="sm">
+          {{ task.priority.name }}
+        </BaseBadge>
+      </div>
     </div>
 
     <!-- Description -->
-    <p v-if="task.description" class="mt-2.5 line-clamp-2 text-sm leading-relaxed text-slate-500">
+    <p v-if="task.description" class="mt-2.5 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-slate-500">
       {{ task.description }}
     </p>
+    <div v-else class="mt-2.5 min-h-[2.5rem]"></div>
 
     <!-- Tags -->
-    <div v-if="task.tags.length" class="mt-3 flex flex-wrap gap-1.5">
-      <BaseBadge v-for="tag in task.tags" :key="tag.id" color="gray" size="sm">
+    <div v-if="task.tags.length" class="mt-4 flex flex-wrap gap-1.5">
+      <BaseBadge v-for="tag in task.tags" :key="tag.id" color="gray" size="sm" class="bg-slate-100/80 text-slate-600">
         {{ tag.name }}
       </BaseBadge>
     </div>
+    <div v-else class="mt-4 min-h-[24px]"></div>
 
-    <!-- Meta row: due date + status badge -->
-    <div class="mt-4 flex flex-wrap items-center gap-3">
-      <BaseBadge :color="statusInfo.color">
-        {{ statusInfo.label }}
-      </BaseBadge>
+    <!-- Spacer to push footer down -->
+    <div class="flex-grow"></div>
 
-      <span
-        v-if="task.due_date"
-        class="flex items-center gap-1 text-xs"
-        :class="isOverdue ? 'font-medium text-red-600' : 'text-gray-400'"
-      >
-        <svg
-          class="h-3.5 w-3.5"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-          />
-        </svg>
-        {{ task.due_date.slice(0, 10) }}
-      </span>
-    </div>
+    <!-- Footer: due date + actions -->
+    <div class="mt-6 flex flex-wrap items-center justify-between border-t border-slate-100/80 pt-4 gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Interactive Status Badge/Select -->
+        <div class="relative group/status rounded-lg">
+          <select
+            :value="task.status"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            @change="onStatusChange"
+            title="Cambiar estado"
+            aria-label="Cambiar estado de la tarea"
+          >
+            <option v-for="opt in TASK_STATUS_OPTIONS" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <div 
+            class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-200 shadow-sm"
+            :class="{
+              'bg-amber-50 text-amber-700 border-amber-200 group-hover/status:border-amber-300 group-hover/status:bg-amber-100': task.status === 'pendiente',
+              'bg-blue-50 text-blue-700 border-blue-200 group-hover/status:border-blue-300 group-hover/status:bg-blue-100': task.status === 'en_progreso',
+              'bg-emerald-50 text-emerald-700 border-emerald-200 group-hover/status:border-emerald-300 group-hover/status:bg-emerald-100': task.status === 'completada'
+            }"
+          >
+            <!-- Status Dot -->
+            <span 
+              class="w-1.5 h-1.5 rounded-full"
+              :class="{
+                'bg-amber-500': task.status === 'pendiente',
+                'bg-blue-500': task.status === 'en_progreso',
+                'bg-emerald-500': task.status === 'completada'
+              }"
+            ></span>
+            {{ statusInfo.label }}
+            <svg class="h-3.5 w-3.5 opacity-60 ml-0.5 group-hover/status:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
 
-    <!-- Divider + Actions -->
-    <div class="mt-5 flex items-center gap-3 border-t border-slate-100 pt-4">
-      <select
-        :value="task.status"
-        class="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold tracking-wide text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-        @change="onStatusChange"
-      >
-        <option value="pendiente">Pendiente</option>
-        <option value="en_progreso">En Progreso</option>
-        <option value="completada">Completada</option>
-      </select>
-
-      <div
-        class="ml-auto flex items-center gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100 sm:opacity-100"
-      >
-        <RouterLink
-          :to="{ name: 'task-edit', params: { id: task.id } }"
-          class="rounded-lg p-2 text-slate-400 transition-all hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-          title="Editar"
+        <span
+          v-if="task.due_date"
+          class="flex items-center gap-1.5 text-xs font-semibold text-slate-500"
         >
           <svg
-            class="h-4 w-4"
+            class="h-3.5 w-3.5"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+            />
+          </svg>
+          {{ task.due_date.slice(0, 10) }}
+        </span>
+      </div>
+
+      <div
+        class="flex items-center gap-1 opacity-0 transition-opacity duration-300 group-hover:opacity-100 focus-within:opacity-100 sm:opacity-100"
+      >
+
+        <RouterLink
+          :to="{ name: 'task-edit', params: { id: task.id } }"
+          class="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+          title="Editar"
+          aria-label="Editar tarea"
+        >
+          <svg
+            class="h-4.5 w-4.5"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -129,12 +155,13 @@ function onStatusChange(event: Event) {
           </svg>
         </RouterLink>
         <button
-          class="rounded-lg p-2 text-slate-400 transition-all hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+          class="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/40"
           title="Eliminar"
+          aria-label="Eliminar tarea"
           @click="emit('delete', task.id)"
         >
           <svg
-            class="h-4 w-4"
+            class="h-4.5 w-4.5"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"

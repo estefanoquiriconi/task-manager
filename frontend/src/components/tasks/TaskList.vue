@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import type { TaskStatus } from '@/types'
 import { useTaskStore } from '@/stores/taskStore'
 import { useNotification } from '@/composables/useNotification'
 import TaskCard from './TaskCard.vue'
@@ -13,9 +14,9 @@ const { notify } = useNotification()
 const deleteTarget = ref<{ id: number; title: string } | null>(null)
 const deleting = ref(false)
 
-async function onStatusChange(id: number, status: string) {
+async function onStatusChange(id: number, status: TaskStatus) {
   try {
-    await store.updateTask(id, { status: status as 'pendiente' | 'en_progreso' | 'completada' })
+    await store.updateTask(id, { status })
     notify('Estado actualizado', 'success')
   } catch {
     notify('Error al actualizar el estado', 'error')
@@ -168,7 +169,7 @@ function nextPage() {
     <!-- Pagination -->
     <div
       v-if="store.lastPage > 1"
-      class="mt-10 flex items-center justify-between rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-md px-5 py-4 shadow-sm"
+      class="mt-10 flex items-center justify-between px-2"
     >
       <p class="text-sm font-medium text-slate-500">
         {{ store.total }} tarea{{ store.total !== 1 ? 's' : '' }} en total
