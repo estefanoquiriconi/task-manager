@@ -6,6 +6,7 @@ import { useNotification } from '@/composables/useNotification'
 import * as taskService from '@/services/taskService'
 import TaskForm from '@/components/tasks/TaskForm.vue'
 import type { Task, CreateTaskPayload } from '@/types'
+import { extractValidationErrors } from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,9 +19,11 @@ const taskId = computed(() => (isEdit.value ? Number(route.params.id) : null))
 const task = ref<Task | null>(null)
 const loadingTask = ref(false)
 const submitting = ref(false)
+const serverErrors = ref<Record<string, string>>({})
 
 async function handleSubmit(payload: CreateTaskPayload) {
   submitting.value = true
+  serverErrors.value = {}
   try {
     if (isEdit.value && taskId.value) {
       await store.updateTask(taskId.value, payload)
@@ -29,9 +32,14 @@ async function handleSubmit(payload: CreateTaskPayload) {
       await store.createTask(payload)
       notify('Tarea creada correctamente', 'success')
     }
-    router.push({ name: 'tasks' })
-  } catch {
-    notify('Error al guardar la tarea. Revisa los datos e intenta de nuevo.', 'error')
+    await router.push({ name: 'tasks' })
+  } catch (error) {
+    const validationErrors = extractValidationErrors(error)
+    if (validationErrors) {
+      serverErrors.value = validationErrors
+    } else {
+      notify('Error al guardar la tarea. Intenta de nuevo.', 'error')
+    }
   } finally {
     submitting.value = false
   }
@@ -53,10 +61,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-2xl px-4 py-8">
-    <div class="mb-8">
+  <div class="mx-auto max-w-3xl px-4 py-8 lg:py-12">
+    <div class="mb-10">
       <button
-        class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-all hover:text-indigo-600 hover:-translate-x-1"
+        class="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-all hover:text-indigo-600 hover:-translate-x-1 focus:outline-none"
         @click="router.push({ name: 'tasks' })"
       >
         <svg
@@ -73,11 +81,18 @@ onMounted(async () => {
             d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
           />
         </svg>
-        Volver a tareas
+        Volver a mis tareas
       </button>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
-        {{ isEdit ? 'Editar tarea' : 'Nueva tarea' }}
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">
+        {{ isEdit ? 'Editar tarea' : 'Crear nueva tarea' }}
       </h1>
+      <p class="mt-2 text-base text-slate-500">
+        {{
+          isEdit
+            ? 'Modifica los detalles de tu tarea a continuación.'
+            : 'Completa los detalles para organizar tu trabajo.'
+        }}
+      </p>
     </div>
 
     <!-- Loading skeleton -->
@@ -113,6 +128,7 @@ onMounted(async () => {
       v-else-if="!isEdit || task"
       :initial-data="task ?? undefined"
       :submitting="submitting"
+      :server-errors="serverErrors"
       @submit="handleSubmit"
     />
   </div>

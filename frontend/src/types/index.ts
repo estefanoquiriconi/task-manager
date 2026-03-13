@@ -1,3 +1,26 @@
+export interface User {
+  id: number
+  name: string
+  email: string
+}
+
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
+export interface RegisterPayload {
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
+
+export interface AuthResponse {
+  user: User
+  token: string
+}
+
 export interface Priority {
   id: number
   name: string
@@ -8,11 +31,19 @@ export interface Tag {
   name: string
 }
 
+export type TaskStatus = 'pendiente' | 'en_progreso' | 'completada'
+
+export const TASK_STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'en_progreso', label: 'En Progreso' },
+  { value: 'completada', label: 'Completada' },
+]
+
 export interface Task {
   id: number
   title: string
   description: string | null
-  status: 'pendiente' | 'en_progreso' | 'completada'
+  status: TaskStatus
   due_date: string | null
   priority: Priority
   tags: Tag[]
@@ -37,7 +68,7 @@ export interface PaginatedResponse<T> {
 }
 
 export interface TaskFilters {
-  status?: 'pendiente' | 'en_progreso' | 'completada'
+  status?: TaskStatus
   priority_id?: number
   date_from?: string
   date_to?: string
@@ -48,7 +79,7 @@ export interface TaskFilters {
 export interface CreateTaskPayload {
   title: string
   description?: string | null
-  status: 'pendiente' | 'en_progreso' | 'completada'
+  status: TaskStatus
   due_date?: string | null
   priority_id: number
   tags?: number[]
@@ -57,7 +88,7 @@ export interface CreateTaskPayload {
 export interface UpdateTaskPayload {
   title?: string
   description?: string | null
-  status?: 'pendiente' | 'en_progreso' | 'completada'
+  status?: TaskStatus
   due_date?: string | null
   priority_id?: number
   tags?: number[]
