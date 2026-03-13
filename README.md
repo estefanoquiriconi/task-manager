@@ -39,6 +39,13 @@ docker exec task_manager_api php artisan key:generate
 docker exec task_manager_api php artisan migrate --seed
 ```
 
+The seeder creates a test user with 15 sample tasks:
+
+| Field | Value |
+|-------|-------|
+| Email | `test@example.com` |
+| Password | `password` |
+
 The application will be available at:
 
 | Service | URL |
