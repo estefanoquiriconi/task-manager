@@ -87,6 +87,7 @@ function onStatusChange(event: Event) {
         <div class="relative group/status rounded-lg">
           <select
             :value="task.status"
+            name="status"
             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             @change="onStatusChange"
             title="Cambiar estado"

@@ -106,14 +106,16 @@ async function handleSubmit() {
           <div class="space-y-5">
             <BaseInput
               v-model="form.email"
+              name="email"
               label="Correo electrónico"
               type="email"
               :error="errors.email"
-              placeholder="tu@empresa.com"
+              placeholder="tu@gmail.com"
             />
 
             <BaseInput
               v-model="form.password"
+              name="password"
               label="Contraseña"
               type="password"
               :error="errors.password"

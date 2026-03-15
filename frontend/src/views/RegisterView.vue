@@ -118,6 +118,7 @@ async function handleSubmit() {
           <div class="space-y-5">
             <BaseInput
               v-model="form.name"
+              name="name"
               label="Nombre completo"
               :error="errors.name"
               placeholder="Ej. Juan Pérez"
@@ -125,14 +126,16 @@ async function handleSubmit() {
             />
             <BaseInput
               v-model="form.email"
+              name="email"
               label="Correo electrónico"
               type="email"
               :error="errors.email"
-              placeholder="tu@empresa.com"
+              placeholder="tu@gmail.com"
               autocomplete="email"
             />
             <BaseInput
               v-model="form.password"
+              name="password"
               label="Contraseña"
               type="password"
               :error="errors.password"
@@ -141,6 +144,7 @@ async function handleSubmit() {
             />
             <BaseInput
               v-model="form.password_confirmation"
+              name="password_confirmation"
               label="Confirmar contraseña"
               type="password"
               :error="errors.password_confirmation"

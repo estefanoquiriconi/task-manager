@@ -44,6 +44,7 @@ onMounted(() => {
       <div class="w-full sm:w-auto flex-1 min-w-[140px]">
         <BaseSelect
           v-model="localFilters.status"
+          name="status"
           label="Estado"
           placeholder="Todos"
           :options="statusOptions"
@@ -53,6 +54,7 @@ onMounted(() => {
       <div class="w-full sm:w-auto flex-1 min-w-[140px]">
         <BaseSelect
           v-model.number="localFilters.priority_id"
+          name="priority_id"
           label="Prioridad"
           placeholder="Todas"
           :options="store.priorities.map((p) => ({ value: p.id, label: p.name }))"
@@ -62,6 +64,7 @@ onMounted(() => {
       <div class="w-full sm:w-auto flex-1 min-w-[140px]">
         <BaseSelect
           v-model.number="localFilters.tag_id"
+          name="tag_id"
           label="Etiqueta"
           placeholder="Todas"
           :options="store.tags.map((t) => ({ value: t.id, label: t.name }))"
@@ -74,6 +77,7 @@ onMounted(() => {
         >
         <input
           v-model="localFilters.date_from"
+          name="date_from"
           type="date"
           class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
@@ -85,6 +89,7 @@ onMounted(() => {
         >
         <input
           v-model="localFilters.date_to"
+          name="date_to"
           type="date"
           class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition-all hover:border-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />

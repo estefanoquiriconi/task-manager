@@ -95,6 +95,7 @@ onMounted(() => {
       <div class="space-y-6">
         <BaseInput
           v-model="form.title"
+          name="title"
           label="Título de la tarea"
           :error="fieldError('title')"
           @blur="onBlur('title')"
@@ -103,16 +104,18 @@ onMounted(() => {
 
         <BaseInput
           v-model="form.description"
+          name="description"
           label="Descripción detallada"
           multiline
           placeholder="Agrega más detalles sobre lo que hay que hacer..."
         />
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <BaseSelect v-model="form.status" label="Estado actual" :options="statusOptions" />
+          <BaseSelect v-model="form.status" name="status" label="Estado actual" :options="statusOptions" />
 
           <BaseSelect
             v-model.number="form.priority_id"
+            name="priority_id"
             label="Nivel de prioridad"
             placeholder="Seleccionar..."
             :options="priorityOptions"
@@ -121,6 +124,7 @@ onMounted(() => {
 
           <BaseInput
             v-model="form.due_date"
+            name="due_date"
             label="Fecha límite"
             type="date"
             :error="fieldError('due_date')"
