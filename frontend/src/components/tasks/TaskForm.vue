@@ -76,7 +76,7 @@ function onSubmit() {
     status: form.status,
     due_date: form.due_date || null,
     priority_id: form.priority_id!,
-    tags: form.tags.length > 0 ? form.tags : undefined,
+    tags: form.tags,
   }
   emit('submit', payload)
 }
