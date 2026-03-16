@@ -19,7 +19,6 @@ const statusOptions = TASK_STATUS_OPTIONS
 
 function applyFilters() {
   store.setFilters({ ...localFilters })
-  store.fetchTasks()
 }
 
 function clearFilters() {
@@ -29,7 +28,6 @@ function clearFilters() {
   localFilters.date_from = undefined
   localFilters.date_to = undefined
   store.resetFilters()
-  store.fetchTasks()
 }
 
 onMounted(() => {

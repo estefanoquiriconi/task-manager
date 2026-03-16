@@ -44,17 +44,14 @@ async function confirmDelete() {
 
 function clearAndFetch() {
   store.resetFilters()
-  store.fetchTasks()
 }
 
 function prevPage() {
-  store.setPage(store.currentPage - 1)
-  store.fetchTasks()
+  store.fetchTasks(store.currentPage - 1)
 }
 
 function nextPage() {
-  store.setPage(store.currentPage + 1)
-  store.fetchTasks()
+  store.fetchTasks(store.currentPage + 1)
 }
 </script>
 

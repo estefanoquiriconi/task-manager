@@ -27,7 +27,8 @@ export const useTaskStore = defineStore('task', () => {
   )
 
   // Actions
-  async function fetchTasks() {
+  async function fetchTasks(page?: number) {
+    if (page !== undefined) currentPage.value = page
     loading.value = true
     try {
       const response = await taskService.getTasks({ ...filters.value, page: currentPage.value })
@@ -41,8 +42,9 @@ export const useTaskStore = defineStore('task', () => {
   }
 
   async function createTask(payload: CreateTaskPayload) {
-    await taskService.createTask(payload)
-    await fetchTasks()
+    const created = await taskService.createTask(payload)
+    tasks.value.unshift(created)
+    total.value++
   }
 
   async function updateTask(id: number, payload: UpdateTaskPayload) {
@@ -55,7 +57,8 @@ export const useTaskStore = defineStore('task', () => {
 
   async function deleteTask(id: number) {
     await taskService.deleteTask(id)
-    await fetchTasks()
+    tasks.value = tasks.value.filter((t) => t.id !== id)
+    total.value--
   }
 
   async function fetchPriorities() {
@@ -66,18 +69,14 @@ export const useTaskStore = defineStore('task', () => {
     tags.value = await taskService.getTags()
   }
 
-  function setFilters(newFilters: TaskFilters) {
+  async function setFilters(newFilters: TaskFilters) {
     filters.value = newFilters
-    currentPage.value = 1
+    await fetchTasks(1)
   }
 
-  function setPage(page: number) {
-    currentPage.value = page
-  }
-
-  function resetFilters() {
+  async function resetFilters() {
     filters.value = {}
-    currentPage.value = 1
+    await fetchTasks(1)
   }
 
   return {
@@ -97,7 +96,6 @@ export const useTaskStore = defineStore('task', () => {
     fetchPriorities,
     fetchTags,
     setFilters,
-    setPage,
     resetFilters,
   }
 })
