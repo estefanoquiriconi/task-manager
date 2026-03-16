@@ -45,7 +45,7 @@ function onStatusChange(event: Event) {
       >
         {{ task.title }}
       </h3>
-      <div class="flex-shrink-0">
+      <div class="shrink-0">
         <BaseBadge :color="priorityInfo.color" size="sm">
           {{ task.priority.name }}
         </BaseBadge>
@@ -55,11 +55,11 @@ function onStatusChange(event: Event) {
     <!-- Description -->
     <p
       v-if="task.description"
-      class="mt-2.5 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-slate-500"
+      class="mt-2.5 line-clamp-2 min-h-10 text-sm leading-relaxed text-slate-500"
     >
       {{ task.description }}
     </p>
-    <div v-else class="mt-2.5 min-h-[2.5rem]"></div>
+    <div v-else class="mt-2.5 min-h-10"></div>
 
     <!-- Tags -->
     <div v-if="task.tags.length" class="mt-4 flex flex-wrap gap-1.5">
@@ -76,7 +76,7 @@ function onStatusChange(event: Event) {
     <div v-else class="mt-4 min-h-[24px]"></div>
 
     <!-- Spacer to push footer down -->
-    <div class="flex-grow"></div>
+    <div class="grow"></div>
 
     <!-- Footer: due date + actions -->
     <div
