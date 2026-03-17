@@ -41,16 +41,16 @@ describe('taskService', () => {
     it('calls GET /tasks with cleaned params', async () => {
       vi.mocked(api.get).mockResolvedValue({ data: mockPaginated })
 
-      const result = await taskService.getTasks({ status: 'pendiente', priority_id: undefined })
+      const result = await taskService.getTasks({ status: 'pendiente', priority_id: undefined }, 2)
 
-      expect(api.get).toHaveBeenCalledWith('/tasks', { params: { status: 'pendiente' } })
+      expect(api.get).toHaveBeenCalledWith('/tasks', { params: { status: 'pendiente', page: 2 } })
       expect(result).toEqual(mockPaginated)
     })
 
     it('strips empty string and null values from params', async () => {
       vi.mocked(api.get).mockResolvedValue({ data: mockPaginated })
 
-      await taskService.getTasks({ status: '' as never, date_from: undefined })
+      await taskService.getTasks({ status: '' as never, date_from: undefined }, Number.NaN)
 
       expect(api.get).toHaveBeenCalledWith('/tasks', { params: {} })
     })
@@ -60,7 +60,7 @@ describe('taskService', () => {
 
       await taskService.getTasks()
 
-      expect(api.get).toHaveBeenCalledWith('/tasks', { params: {} })
+      expect(api.get).toHaveBeenCalledWith('/tasks', { params: { page: 1 } })
     })
   })
 
