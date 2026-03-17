@@ -5,6 +5,7 @@ import type {
   Priority,
   Tag,
   TaskFilters,
+  TaskListQueryState,
   CreateTaskPayload,
   UpdateTaskPayload,
 } from '@/types'
@@ -26,16 +27,21 @@ export const useTaskStore = defineStore('task', () => {
     Object.values(filters.value).some((v) => v !== undefined && v !== null && v !== ''),
   )
 
+  function setListQueryState(state: TaskListQueryState) {
+    filters.value = { ...state.filters }
+    currentPage.value = state.page
+  }
+
   // Actions
-  async function fetchTasks(page?: number) {
-    if (page !== undefined) currentPage.value = page
+  async function fetchTasks() {
     loading.value = true
     try {
-      const response = await taskService.getTasks({ ...filters.value, page: currentPage.value })
+      const response = await taskService.getTasks(filters.value, currentPage.value)
       tasks.value = response.data
       currentPage.value = response.meta.current_page
       lastPage.value = response.meta.last_page
       total.value = response.meta.total
+      return response
     } finally {
       loading.value = false
     }
@@ -70,13 +76,15 @@ export const useTaskStore = defineStore('task', () => {
   }
 
   async function setFilters(newFilters: TaskFilters) {
-    filters.value = newFilters
-    await fetchTasks(1)
+    filters.value = { ...newFilters }
+    currentPage.value = 1
+    await fetchTasks()
   }
 
   async function resetFilters() {
     filters.value = {}
-    await fetchTasks(1)
+    currentPage.value = 1
+    await fetchTasks()
   }
 
   return {
@@ -89,6 +97,7 @@ export const useTaskStore = defineStore('task', () => {
     lastPage,
     total,
     hasActiveFilters,
+    setListQueryState,
     fetchTasks,
     createTask,
     updateTask,

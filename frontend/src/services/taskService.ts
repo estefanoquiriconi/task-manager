@@ -9,9 +9,18 @@ import type {
   UpdateTaskPayload,
 } from '@/types'
 
-export async function getTasks(filters: TaskFilters = {}): Promise<PaginatedResponse<Task>> {
+export async function getTasks(
+  filters: TaskFilters = {},
+  page = 1,
+): Promise<PaginatedResponse<Task>> {
   const params = Object.fromEntries(
-    Object.entries(filters).filter(([, v]) => v !== undefined && v !== null && v !== ''),
+    Object.entries({ ...filters, page }).filter(
+      ([, value]) =>
+        value !== undefined &&
+        value !== null &&
+        value !== '' &&
+        !(typeof value === 'number' && Number.isNaN(value)),
+    ),
   )
   const { data } = await api.get<PaginatedResponse<Task>>('/tasks', { params })
   return data

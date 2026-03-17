@@ -73,7 +73,11 @@ export interface TaskFilters {
   date_from?: string
   date_to?: string
   tag_id?: number
-  page?: number
+}
+
+export interface TaskListQueryState {
+  filters: TaskFilters
+  page: number
 }
 
 export interface CreateTaskPayload {
