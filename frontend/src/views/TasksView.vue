@@ -1,15 +1,106 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { watch } from 'vue'
+import { RouterLink, useRoute, useRouter, type LocationQuery, type LocationQueryRaw } from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
 import TaskFilters from '@/components/tasks/TaskFilters.vue'
 import TaskList from '@/components/tasks/TaskList.vue'
+import type { TaskFilters as TaskFiltersShape, TaskListQueryState } from '@/types'
+import {
+  TASK_LIST_QUERY_KEYS,
+  buildTaskListQuery,
+  parseTaskListQuery,
+} from '@/utils/taskListQuery'
 
 const store = useTaskStore()
+const route = useRoute()
+const router = useRouter()
 
-onMounted(() => {
-  store.fetchTasks()
-})
+const managedQueryKeys = new Set<string>(TASK_LIST_QUERY_KEYS)
+
+function buildRouteQuery(state: TaskListQueryState): LocationQueryRaw {
+  const nextQuery: LocationQueryRaw = {}
+
+  for (const [key, value] of Object.entries(route.query)) {
+    if (!managedQueryKeys.has(key)) {
+      nextQuery[key] = value
+    }
+  }
+
+  return {
+    ...nextQuery,
+    ...buildTaskListQuery(state),
+  }
+}
+
+function resolveFullPath(query: LocationQueryRaw) {
+  return router.resolve({ path: route.path, query, hash: route.hash }).fullPath
+}
+
+function navigateWithState(state: TaskListQueryState, mode: 'push' | 'replace' = 'push') {
+  const query = buildRouteQuery(state)
+  return mode === 'push' ? router.push({ query }) : router.replace({ query })
+}
+
+function applyFilters(filters: TaskFiltersShape) {
+  return navigateWithState({ filters, page: 1 })
+}
+
+function clearFilters() {
+  return navigateWithState({ filters: {}, page: 1 })
+}
+
+function changePage(page: number) {
+  return navigateWithState({
+    filters: store.filters,
+    page: Math.max(1, page),
+  })
+}
+
+store.setListQueryState(parseTaskListQuery(route.query))
+
+let activeRequestId = 0
+let skipNextFetchForPath: string | null = null
+
+watch(
+  () => route.query,
+  async (query: LocationQuery) => {
+    const parsedState = parseTaskListQuery(query)
+    const normalizedQuery = buildRouteQuery(parsedState)
+    const normalizedFullPath = resolveFullPath(normalizedQuery)
+
+    if (normalizedFullPath !== route.fullPath) {
+      await navigateWithState(parsedState, 'replace')
+      return
+    }
+
+    store.setListQueryState(parsedState)
+
+    if (skipNextFetchForPath === route.fullPath) {
+      skipNextFetchForPath = null
+      return
+    }
+
+    const requestId = ++activeRequestId
+    await store.fetchTasks()
+
+    if (requestId !== activeRequestId) {
+      return
+    }
+
+    const correctedState: TaskListQueryState = {
+      filters: store.filters,
+      page: store.currentPage,
+    }
+    const correctedQuery = buildRouteQuery(correctedState)
+    const correctedFullPath = resolveFullPath(correctedQuery)
+
+    if (correctedFullPath !== route.fullPath) {
+      skipNextFetchForPath = correctedFullPath
+      await navigateWithState(correctedState, 'replace')
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -39,7 +130,17 @@ onMounted(() => {
       </RouterLink>
     </header>
 
-    <TaskFilters class="mb-6" />
-    <TaskList />
+    <TaskFilters
+      class="mb-6"
+      :applied-filters="store.filters"
+      :has-active-filters="store.hasActiveFilters"
+      @apply="applyFilters"
+      @clear="clearFilters"
+    />
+    <TaskList
+      :has-active-filters="store.hasActiveFilters"
+      @change-page="changePage"
+      @clear-filters="clearFilters"
+    />
   </div>
 </template>

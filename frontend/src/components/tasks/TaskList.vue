@@ -8,6 +8,15 @@ import TaskCard from './TaskCard.vue'
 import ConfirmModal from './ConfirmModal.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 
+const props = defineProps<{
+  hasActiveFilters: boolean
+}>()
+
+const emit = defineEmits<{
+  'change-page': [page: number]
+  'clear-filters': []
+}>()
+
 const store = useTaskStore()
 const { notify } = useNotification()
 
@@ -43,15 +52,15 @@ async function confirmDelete() {
 }
 
 function clearAndFetch() {
-  store.resetFilters()
+  emit('clear-filters')
 }
 
 function prevPage() {
-  store.fetchTasks(store.currentPage - 1)
+  emit('change-page', store.currentPage - 1)
 }
 
 function nextPage() {
-  store.fetchTasks(store.currentPage + 1)
+  emit('change-page', store.currentPage + 1)
 }
 </script>
 
@@ -109,7 +118,7 @@ function nextPage() {
       </svg>
     </div>
 
-    <template v-if="store.hasActiveFilters">
+    <template v-if="props.hasActiveFilters">
       <p class="text-base font-semibold text-slate-900">No hay coincidencias</p>
       <p class="mt-2 text-sm text-slate-500 max-w-sm">
         No encontramos tareas que coincidan con los filtros que aplicaste. Mueve los filtros o

@@ -1,39 +1,55 @@
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, watch } from 'vue'
 import { useTaskStore } from '@/stores/taskStore'
 import { TASK_STATUS_OPTIONS, type TaskFilters } from '@/types'
 import BaseSelect from '@/components/base/BaseSelect.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 
+const props = defineProps<{
+  appliedFilters: TaskFilters
+  hasActiveFilters: boolean
+}>()
+
+const emit = defineEmits<{
+  apply: [filters: TaskFilters]
+  clear: []
+}>()
+
 const store = useTaskStore()
 
-const localFilters = reactive<TaskFilters>({
-  status: undefined,
-  priority_id: undefined,
-  tag_id: undefined,
-  date_from: undefined,
-  date_to: undefined,
-})
+const localFilters = reactive<TaskFilters>({})
 
 const statusOptions = TASK_STATUS_OPTIONS
 
+function syncLocalFilters(filters: TaskFilters) {
+  localFilters.status = filters.status
+  localFilters.priority_id = filters.priority_id
+  localFilters.tag_id = filters.tag_id
+  localFilters.date_from = filters.date_from
+  localFilters.date_to = filters.date_to
+}
+
 function applyFilters() {
-  store.setFilters({ ...localFilters })
+  emit('apply', { ...localFilters })
 }
 
 function clearFilters() {
-  localFilters.status = undefined
-  localFilters.priority_id = undefined
-  localFilters.tag_id = undefined
-  localFilters.date_from = undefined
-  localFilters.date_to = undefined
-  store.resetFilters()
+  syncLocalFilters({})
+  emit('clear')
 }
 
 onMounted(() => {
   if (store.priorities.length === 0) store.fetchPriorities()
   if (store.tags.length === 0) store.fetchTags()
 })
+
+watch(
+  () => props.appliedFilters,
+  (filters) => {
+    syncLocalFilters(filters)
+  },
+  { immediate: true, deep: true },
+)
 </script>
 
 <template>
@@ -112,7 +128,7 @@ onMounted(() => {
           Filtrar
         </BaseButton>
 
-        <BaseButton v-if="store.hasActiveFilters" variant="ghost" size="md" @click="clearFilters">
+        <BaseButton v-if="props.hasActiveFilters" variant="ghost" size="md" @click="clearFilters">
           Limpiar
         </BaseButton>
       </div>
