@@ -3,32 +3,28 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
-    private const TOKEN_NAME = 'auth-token';
-
     /**
      * @param  array{name: string, email: string, password: string}  $data
-     * @return array{user: User, token: string}
      */
-    public function register(array $data): array
+    public function register(array $data): User
     {
         $user = User::create($data);
 
-        return [
-            'user' => $user,
-            'token' => $this->createToken($user),
-        ];
+        Auth::login($user);
+
+        return $user;
     }
 
     /**
      * @param  array{email: string, password: string}  $credentials
-     * @return array{user: User, token: string}
      */
-    public function login(array $credentials): array
+    public function login(array $credentials): User
     {
         $user = User::where('email', $credentials['email'])->first();
 
@@ -38,19 +34,18 @@ class AuthService
             ]);
         }
 
-        return [
-            'user' => $user,
-            'token' => $this->createToken($user),
-        ];
+        Auth::login($user);
+
+        return $user;
     }
 
-    public function logout(User $user): void
+    public function logout(): void
     {
-        $user->tokens()->delete();
-    }
+        Auth::guard('web')->logout();
 
-    private function createToken(User $user): string
-    {
-        return $user->createToken(self::TOKEN_NAME)->plainTextToken;
+        if (request()->hasSession()) {
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
     }
 }
