@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('the application redirects root to the api docs', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertRedirect('/docs/api');
 });
