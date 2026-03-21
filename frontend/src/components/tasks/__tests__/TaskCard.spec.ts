@@ -11,7 +11,10 @@ function createTask(overrides: Partial<Task> = {}): Task {
     status: 'pendiente',
     due_date: '2026-03-15T00:00:00Z',
     priority: { id: 1, name: 'ALTA' },
-    tags: [{ id: 1, name: 'bug' }, { id: 2, name: 'frontend' }],
+    tags: [
+      { id: 1, name: 'bug' },
+      { id: 2, name: 'frontend' },
+    ],
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
@@ -57,7 +60,10 @@ describe('TaskCard', () => {
   })
 
   it('renders all tags', () => {
-    const tags = [{ id: 1, name: 'bug' }, { id: 2, name: 'urgent' }]
+    const tags = [
+      { id: 1, name: 'bug' },
+      { id: 2, name: 'urgent' },
+    ]
     const wrapper = shallowMount(TaskCard, {
       props: { task: createTask({ tags }) },
       global: { stubs },

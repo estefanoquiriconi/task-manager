@@ -131,7 +131,9 @@ describe('TasksView', () => {
   it('normalizes invalid task query params while preserving unrelated params', async () => {
     vi.mocked(taskService.getTasks).mockResolvedValue(createResponse(1))
 
-    const { wrapper, router } = await mountTasksView('/?status=archived&priority_id=abc&page=foo&keep=yes')
+    const { wrapper, router } = await mountTasksView(
+      '/?status=archived&priority_id=abc&page=foo&keep=yes',
+    )
 
     expect(taskService.getTasks).toHaveBeenCalledTimes(1)
     expect(taskService.getTasks).toHaveBeenCalledWith({}, 1)
@@ -141,7 +143,9 @@ describe('TasksView', () => {
   })
 
   it('pushes filter and page changes into the URL and keeps back-forward in sync', async () => {
-    vi.mocked(taskService.getTasks).mockImplementation(async (_filters = {}, page = 1) => createResponse(page))
+    vi.mocked(taskService.getTasks).mockImplementation(async (_filters = {}, page = 1) =>
+      createResponse(page),
+    )
 
     const { wrapper, router } = await mountTasksView('/?status=pendiente')
 
@@ -151,20 +155,29 @@ describe('TasksView', () => {
     await settle()
 
     expect(router.currentRoute.value.fullPath).toBe('/?status=completada&priority_id=2')
-    expect(taskService.getTasks).toHaveBeenLastCalledWith({ status: 'completada', priority_id: 2 }, 1)
+    expect(taskService.getTasks).toHaveBeenLastCalledWith(
+      { status: 'completada', priority_id: 2 },
+      1,
+    )
     expect(wrapper.get('[data-test="applied-filters"]').text()).toContain('"status":"completada"')
 
     await wrapper.get('[data-test="page-4"]').trigger('click')
     await settle()
 
     expect(router.currentRoute.value.fullPath).toBe('/?status=completada&priority_id=2&page=4')
-    expect(taskService.getTasks).toHaveBeenLastCalledWith({ status: 'completada', priority_id: 2 }, 4)
+    expect(taskService.getTasks).toHaveBeenLastCalledWith(
+      { status: 'completada', priority_id: 2 },
+      4,
+    )
 
     router.back()
     await settle()
 
     expect(router.currentRoute.value.fullPath).toBe('/?status=completada&priority_id=2')
-    expect(taskService.getTasks).toHaveBeenLastCalledWith({ status: 'completada', priority_id: 2 }, 1)
+    expect(taskService.getTasks).toHaveBeenLastCalledWith(
+      { status: 'completada', priority_id: 2 },
+      1,
+    )
     expect(wrapper.get('[data-test="applied-filters"]').text()).toContain('"status":"completada"')
 
     await wrapper.get('[data-test="clear-from-list"]').trigger('click')

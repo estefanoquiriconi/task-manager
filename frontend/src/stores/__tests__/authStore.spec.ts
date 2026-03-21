@@ -10,11 +10,10 @@ import router from '@/router'
 import * as authService from '@/services/authService'
 
 const mockUser = { id: 1, name: 'Test User', email: 'test@example.com' }
-const mockResponse: AuthResponse = { user: mockUser, token: 'fake-token-123' }
+const mockResponse: AuthResponse = { user: mockUser }
 
 describe('authStore', () => {
   beforeEach(() => {
-    localStorage.clear()
     setActivePinia(createPinia())
     vi.clearAllMocks()
   })
@@ -26,29 +25,28 @@ describe('authStore', () => {
     expect(store.isAuthenticated).toBe(false)
   })
 
-  it('reads token from localStorage', () => {
-    localStorage.setItem('auth_token', 'stored-token')
-    const store = useAuthStore()
-    expect(store.token).toBe('stored-token')
-    expect(store.isAuthenticated).toBe(true)
-  })
-
-  it('login saves user/token and navigates to tasks', async () => {
+  it('login saves user and navigates to tasks', async () => {
     vi.mocked(authService.login).mockResolvedValue(mockResponse)
     const store = useAuthStore()
 
     await store.login({ email: 'test@example.com', password: 'password' })
 
-    expect(authService.login).toHaveBeenCalledWith({ email: 'test@example.com', password: 'password' })
+    expect(authService.login).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: 'password',
+    })
     expect(store.user).toEqual(mockUser)
-    expect(store.token).toBe('fake-token-123')
-    expect(localStorage.getItem('auth_token')).toBe('fake-token-123')
+    expect(store.isAuthenticated).toBe(true)
     expect(router.push).toHaveBeenCalledWith({ name: 'tasks' })
   })
 
   it('login manages loading state', async () => {
     let resolveLogin: (value: AuthResponse) => void
-    vi.mocked(authService.login).mockReturnValue(new Promise((r) => { resolveLogin = r }))
+    vi.mocked(authService.login).mockReturnValue(
+      new Promise((r) => {
+        resolveLogin = r
+      }),
+    )
     const store = useAuthStore()
 
     const loginPromise = store.login({ email: 'a@b.com', password: '123' })
@@ -67,20 +65,25 @@ describe('authStore', () => {
     expect(store.loading).toBe(false)
   })
 
-  it('register saves user/token and navigates to tasks', async () => {
+  it('register saves user and navigates to tasks', async () => {
     vi.mocked(authService.register).mockResolvedValue(mockResponse)
     const store = useAuthStore()
-    const payload = { name: 'Test', email: 'test@example.com', password: 'pass', password_confirmation: 'pass' }
+    const payload = {
+      name: 'Test',
+      email: 'test@example.com',
+      password: 'pass',
+      password_confirmation: 'pass',
+    }
 
     await store.register(payload)
 
     expect(authService.register).toHaveBeenCalledWith(payload)
     expect(store.user).toEqual(mockUser)
-    expect(store.token).toBe('fake-token-123')
+    expect(store.isAuthenticated).toBe(true)
     expect(router.push).toHaveBeenCalledWith({ name: 'tasks' })
   })
 
-  it('logout clears auth and navigates to login', async () => {
+  it('logout clears user and navigates to login', async () => {
     vi.mocked(authService.logout).mockResolvedValue()
     vi.mocked(authService.login).mockResolvedValue(mockResponse)
     const store = useAuthStore()
@@ -89,12 +92,11 @@ describe('authStore', () => {
     await store.logout()
 
     expect(store.user).toBeNull()
-    expect(store.token).toBeNull()
-    expect(localStorage.getItem('auth_token')).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
     expect(router.push).toHaveBeenCalledWith({ name: 'login' })
   })
 
-  it('logout clears auth even if API fails', async () => {
+  it('logout clears user even if API fails', async () => {
     vi.mocked(authService.logout).mockRejectedValue(new Error('network'))
     vi.mocked(authService.login).mockResolvedValue(mockResponse)
     const store = useAuthStore()
@@ -103,37 +105,27 @@ describe('authStore', () => {
     await store.logout().catch(() => {})
 
     expect(store.user).toBeNull()
-    expect(store.token).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
   })
 
-  it('initAuth restores user from localStorage', () => {
-    localStorage.setItem('auth_token', 'tok')
-    localStorage.setItem('auth_user', JSON.stringify(mockUser))
+  it('initAuth fetches user from API', async () => {
+    vi.mocked(authService.getUser).mockResolvedValue(mockUser)
     const store = useAuthStore()
 
-    store.initAuth()
+    await store.initAuth()
 
+    expect(authService.getUser).toHaveBeenCalled()
     expect(store.user).toEqual(mockUser)
+    expect(store.isAuthenticated).toBe(true)
   })
 
-  it('initAuth handles corrupted JSON', () => {
-    localStorage.setItem('auth_token', 'tok')
-    localStorage.setItem('auth_user', '{invalid json')
+  it('initAuth sets user to null on API error', async () => {
+    vi.mocked(authService.getUser).mockRejectedValue(new Error('401'))
     const store = useAuthStore()
 
-    store.initAuth()
+    await store.initAuth()
 
     expect(store.user).toBeNull()
-    expect(store.token).toBeNull()
-    expect(localStorage.getItem('auth_token')).toBeNull()
-  })
-
-  it('initAuth clears auth when no token', () => {
-    localStorage.setItem('auth_user', JSON.stringify(mockUser))
-    const store = useAuthStore()
-
-    store.initAuth()
-
-    expect(store.user).toBeNull()
+    expect(store.isAuthenticated).toBe(false)
   })
 })

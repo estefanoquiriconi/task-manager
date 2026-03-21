@@ -18,7 +18,6 @@ export interface RegisterPayload {
 
 export interface AuthResponse {
   user: User
-  token: string
 }
 
 export interface Priority {

@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { watch } from 'vue'
-import { RouterLink, useRoute, useRouter, type LocationQuery, type LocationQueryRaw } from 'vue-router'
+import {
+  RouterLink,
+  useRoute,
+  useRouter,
+  type LocationQuery,
+  type LocationQueryRaw,
+} from 'vue-router'
 import { useTaskStore } from '@/stores/taskStore'
 import TaskFilters from '@/components/tasks/TaskFilters.vue'
 import TaskList from '@/components/tasks/TaskList.vue'
 import type { TaskFilters as TaskFiltersShape, TaskListQueryState } from '@/types'
-import {
-  TASK_LIST_QUERY_KEYS,
-  buildTaskListQuery,
-  parseTaskListQuery,
-} from '@/utils/taskListQuery'
+import { TASK_LIST_QUERY_KEYS, buildTaskListQuery, parseTaskListQuery } from '@/utils/taskListQuery'
 
 const store = useTaskStore()
 const route = useRoute()

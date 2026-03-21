@@ -14,7 +14,8 @@ it('registers a new user', function () {
     ]);
 
     $response->assertCreated()
-        ->assertJsonStructure(['user' => ['id', 'name', 'email'], 'token']);
+        ->assertJsonStructure(['user' => ['id', 'name', 'email']])
+        ->assertJsonMissing(['token']);
 
     $this->assertDatabaseHas('users', ['email' => 'john@example.com']);
 });
@@ -62,7 +63,8 @@ it('logs in with valid credentials', function () {
     ]);
 
     $response->assertSuccessful()
-        ->assertJsonStructure(['user' => ['id', 'name', 'email'], 'token']);
+        ->assertJsonStructure(['user' => ['id', 'name', 'email']])
+        ->assertJsonMissing(['token']);
 });
 
 it('rejects login with wrong password', function () {
@@ -86,7 +88,7 @@ it('rejects login with non-existent email', function () {
         ->assertJsonValidationErrors('email');
 });
 
-it('logs out and revokes token', function () {
+it('logs out and invalidates session', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user, 'sanctum')

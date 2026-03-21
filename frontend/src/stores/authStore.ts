@@ -6,30 +6,15 @@ import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('auth_token'))
   const loading = ref(false)
 
-  const isAuthenticated = computed(() => !!token.value)
-
-  function setAuth(authUser: User, authToken: string) {
-    user.value = authUser
-    token.value = authToken
-    localStorage.setItem('auth_token', authToken)
-    localStorage.setItem('auth_user', JSON.stringify(authUser))
-  }
-
-  function clearAuth() {
-    user.value = null
-    token.value = null
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
-  }
+  const isAuthenticated = computed(() => !!user.value)
 
   async function login(payload: LoginPayload) {
     loading.value = true
     try {
       const response = await authService.login(payload)
-      setAuth(response.user, response.token)
+      user.value = response.user
       await router.push({ name: 'tasks' })
     } finally {
       loading.value = false
@@ -40,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     try {
       const response = await authService.register(payload)
-      setAuth(response.user, response.token)
+      user.value = response.user
       await router.push({ name: 'tasks' })
     } finally {
       loading.value = false
@@ -51,27 +36,21 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.logout()
     } finally {
-      clearAuth()
+      user.value = null
       await router.push({ name: 'login' })
     }
   }
 
-  function initAuth() {
-    const storedUser = localStorage.getItem('auth_user')
-    if (token.value && storedUser) {
-      try {
-        user.value = JSON.parse(storedUser)
-      } catch {
-        clearAuth()
-      }
-    } else {
-      clearAuth()
+  async function initAuth() {
+    try {
+      user.value = await authService.getUser()
+    } catch {
+      user.value = null
     }
   }
 
   return {
     user,
-    token,
     loading,
     isAuthenticated,
     login,
