@@ -88,9 +88,10 @@ frontend/src/
 
 | Method | URI | Auth | Description |
 |--------|-----|------|-------------|
-| POST | `/api/register` | No | Register user and return token |
-| POST | `/api/login` | No | Login and return token |
-| POST | `/api/logout` | Yes | Revoke tokens |
+| GET | `/sanctum/csrf-cookie` | No | Initialize CSRF cookie for SPA authentication |
+| POST | `/api/register` | No | Register user and start authenticated session |
+| POST | `/api/login` | No | Login and start authenticated session |
+| POST | `/api/logout` | Yes | Invalidate authenticated session |
 | GET | `/api/user` | Yes | Get authenticated user |
 
 ### Tasks
@@ -179,7 +180,7 @@ Controllers handle HTTP concerns, services contain business logic, and repositor
 
 Soft deletes — Tasks use SoftDeletes to allow recovery and preserve basic audit history while preventing permanent data loss.
 
-Sanctum personal access tokens — Stateless authentication for the SPA using Bearer tokens. This approach is simple, avoids session/cookie complexity with CORS, and is sufficient for the scope of the project.
+Sanctum stateful SPA authentication — The frontend authenticates with Laravel Sanctum using cookies and sessions instead of bearer tokens. The SPA first requests `/sanctum/csrf-cookie`, then sends credentialed requests with `withCredentials` and `withXSRFToken` enabled. This keeps auth centralized on the backend and avoids storing tokens in localStorage.
 
 Pinia composition stores — Stores use the setup() syntax to leverage full TypeScript inference and composable reuse.
 
