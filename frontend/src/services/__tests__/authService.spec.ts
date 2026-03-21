@@ -36,7 +36,10 @@ describe('authService', () => {
         expect.stringContaining('/sanctum/csrf-cookie'),
         expect.objectContaining({ withCredentials: true }),
       )
-      expect(api.post).toHaveBeenCalledWith('/login', { email: 'test@example.com', password: 'secret' })
+      expect(api.post).toHaveBeenCalledWith('/login', {
+        email: 'test@example.com',
+        password: 'secret',
+      })
       expect(result).toEqual(mockAuthResponse)
     })
 
@@ -50,7 +53,12 @@ describe('authService', () => {
   describe('register', () => {
     it('fetches CSRF cookie then posts payload', async () => {
       vi.mocked(api.post).mockResolvedValue({ data: mockAuthResponse })
-      const payload = { name: 'Test', email: 'test@example.com', password: 'secret', password_confirmation: 'secret' }
+      const payload = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: 'secret',
+        password_confirmation: 'secret',
+      }
 
       const result = await authService.register(payload)
 

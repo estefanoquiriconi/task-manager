@@ -111,7 +111,12 @@ onMounted(() => {
         />
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <BaseSelect v-model="form.status" name="status" label="Estado actual" :options="statusOptions" />
+          <BaseSelect
+            v-model="form.status"
+            name="status"
+            label="Estado actual"
+            :options="statusOptions"
+          />
 
           <BaseSelect
             v-model.number="form.priority_id"

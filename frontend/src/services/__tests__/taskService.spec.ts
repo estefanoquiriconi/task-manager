@@ -111,7 +111,10 @@ describe('taskService', () => {
 
   describe('getPriorities', () => {
     it('calls GET /priorities and returns data', async () => {
-      const priorities = [{ id: 1, name: 'ALTA' }, { id: 2, name: 'MEDIA' }]
+      const priorities = [
+        { id: 1, name: 'ALTA' },
+        { id: 2, name: 'MEDIA' },
+      ]
       vi.mocked(api.get).mockResolvedValue({ data: priorities })
 
       const result = await taskService.getPriorities()
@@ -123,7 +126,10 @@ describe('taskService', () => {
 
   describe('getTags', () => {
     it('calls GET /tags and returns data', async () => {
-      const tags = [{ id: 1, name: 'bug' }, { id: 2, name: 'feature' }]
+      const tags = [
+        { id: 1, name: 'bug' },
+        { id: 2, name: 'feature' },
+      ]
       vi.mocked(api.get).mockResolvedValue({ data: tags })
 
       const result = await taskService.getTags()

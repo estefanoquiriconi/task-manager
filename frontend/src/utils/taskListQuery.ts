@@ -1,5 +1,10 @@
 import type { LocationQuery, LocationQueryRaw, LocationQueryValue } from 'vue-router'
-import { TASK_STATUS_OPTIONS, type TaskFilters, type TaskListQueryState, type TaskStatus } from '@/types'
+import {
+  TASK_STATUS_OPTIONS,
+  type TaskFilters,
+  type TaskListQueryState,
+  type TaskStatus,
+} from '@/types'
 
 export const TASK_LIST_QUERY_KEYS = [
   'status',
@@ -43,7 +48,8 @@ function parseDate(value: string | undefined): string | undefined {
 export function parseTaskListQuery(query: LocationQuery): TaskListQueryState {
   const status = getSingleQueryValue(query.status)
   const filters: TaskFilters = {
-    status: status && VALID_TASK_STATUSES.has(status as TaskStatus) ? (status as TaskStatus) : undefined,
+    status:
+      status && VALID_TASK_STATUSES.has(status as TaskStatus) ? (status as TaskStatus) : undefined,
     priority_id: parsePositiveInteger(getSingleQueryValue(query.priority_id)),
     tag_id: parsePositiveInteger(getSingleQueryValue(query.tag_id)),
     date_from: parseDate(getSingleQueryValue(query.date_from)),

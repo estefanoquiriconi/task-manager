@@ -31,7 +31,10 @@ describe('authStore', () => {
 
     await store.login({ email: 'test@example.com', password: 'password' })
 
-    expect(authService.login).toHaveBeenCalledWith({ email: 'test@example.com', password: 'password' })
+    expect(authService.login).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: 'password',
+    })
     expect(store.user).toEqual(mockUser)
     expect(store.isAuthenticated).toBe(true)
     expect(router.push).toHaveBeenCalledWith({ name: 'tasks' })
@@ -39,7 +42,11 @@ describe('authStore', () => {
 
   it('login manages loading state', async () => {
     let resolveLogin: (value: AuthResponse) => void
-    vi.mocked(authService.login).mockReturnValue(new Promise((r) => { resolveLogin = r }))
+    vi.mocked(authService.login).mockReturnValue(
+      new Promise((r) => {
+        resolveLogin = r
+      }),
+    )
     const store = useAuthStore()
 
     const loginPromise = store.login({ email: 'a@b.com', password: '123' })
@@ -61,7 +68,12 @@ describe('authStore', () => {
   it('register saves user and navigates to tasks', async () => {
     vi.mocked(authService.register).mockResolvedValue(mockResponse)
     const store = useAuthStore()
-    const payload = { name: 'Test', email: 'test@example.com', password: 'pass', password_confirmation: 'pass' }
+    const payload = {
+      name: 'Test',
+      email: 'test@example.com',
+      password: 'pass',
+      password_confirmation: 'pass',
+    }
 
     await store.register(payload)
 
