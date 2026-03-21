@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as authService from '@/services/authService'
 import type { AuthResponse, User } from '@/types'
 
 vi.mock('@/services/api', () => ({
@@ -9,11 +8,18 @@ vi.mock('@/services/api', () => ({
   },
 }))
 vi.mock('@/router', () => ({ default: { push: vi.fn() } }))
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn().mockResolvedValue({}),
+  },
+}))
 
 import api from '@/services/api'
+import axios from 'axios'
+import * as authService from '@/services/authService'
 
 const mockUser: User = { id: 1, name: 'Test', email: 'test@example.com' }
-const mockAuthResponse: AuthResponse = { user: mockUser, token: 'tok-123' }
+const mockAuthResponse: AuthResponse = { user: mockUser }
 
 describe('authService', () => {
   beforeEach(() => {
@@ -21,11 +27,15 @@ describe('authService', () => {
   })
 
   describe('login', () => {
-    it('posts credentials and returns AuthResponse', async () => {
+    it('fetches CSRF cookie then posts credentials', async () => {
       vi.mocked(api.post).mockResolvedValue({ data: mockAuthResponse })
 
       const result = await authService.login({ email: 'test@example.com', password: 'secret' })
 
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining('/sanctum/csrf-cookie'),
+        expect.objectContaining({ withCredentials: true }),
+      )
       expect(api.post).toHaveBeenCalledWith('/login', { email: 'test@example.com', password: 'secret' })
       expect(result).toEqual(mockAuthResponse)
     })
@@ -38,12 +48,16 @@ describe('authService', () => {
   })
 
   describe('register', () => {
-    it('posts payload and returns AuthResponse', async () => {
+    it('fetches CSRF cookie then posts payload', async () => {
       vi.mocked(api.post).mockResolvedValue({ data: mockAuthResponse })
       const payload = { name: 'Test', email: 'test@example.com', password: 'secret', password_confirmation: 'secret' }
 
       const result = await authService.register(payload)
 
+      expect(axios.get).toHaveBeenCalledWith(
+        expect.stringContaining('/sanctum/csrf-cookie'),
+        expect.objectContaining({ withCredentials: true }),
+      )
       expect(api.post).toHaveBeenCalledWith('/register', payload)
       expect(result).toEqual(mockAuthResponse)
     })
